@@ -113,6 +113,30 @@ char editorReadKey() {
     return c;
 }
 
+int getCursorPosition(int *rows, int *cols) {
+    char buf[32];
+    unsigned int i = 0;
+
+    // Ask terminal for cursor position
+    int rc = write(STDOUT_FILENO, "\x1b[6n", 4);
+    if (rc != 4) return -1;
+
+    // Read the reply from stdin
+    while (i < sizeof(buf) - 1) {
+        int rc = read(STDIN_FILENO, &buf[i], 1);
+        if (rc != 1) break;
+        if (buf[i] == 'R') break;
+        i++;
+    }
+    buf[i] = '\0';
+
+    // Parse the input string for cursor position
+    if (buf[0] != '\x1b' || buf[1] != '[') return -1;
+    if (sscanf(&buf[2], "%d;%d", rows, cols) != 2) return -1;  
+
+    return 0;
+}
+
 /**
  *  getWindowSize:
  *  Gets the window size of the terminal
@@ -124,9 +148,13 @@ char editorReadKey() {
 int getWindowSize(int *rows, int *cols) {
     struct winsize ws;
 
-    int res = ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-    if (res == -1 || ws.ws_col == 0) {
-        return -1;
+    // Use ioctl to get terminal dimensions
+    int rc = ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+    if (1 || rc == -1 || ws.ws_col == 0) {
+        // Fallback if ioctl fails by moving cursor to bottom right
+        rc = write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12);
+        if (rc != 12) return -1;
+        return getCursorPosition(rows, cols);
     } else {
         *cols = ws.ws_col;
         *rows = ws.ws_row;
