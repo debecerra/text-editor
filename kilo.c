@@ -117,6 +117,9 @@ void enableRawMode() {
 /**
  *  editorReadKey
  *  Waits for a single keypress and returns that keypress
+ * 
+ *  Return:
+ *      (int): If valid key, editor key that was read. Else, '\x1b'
  */
 int editorReadKey() {
     int nread; 
@@ -178,6 +181,17 @@ int editorReadKey() {
     }
 }
 
+/**
+ *  getCursorPosition:
+ *  Gets the current position of the cursor.
+ *      
+ *  Args:
+ *      (int *) rows: Pointer to the int to store row position
+ *      (int *) cols: Pointer to the int to store col position
+ * 
+ *  Return:
+ *      (int): 0 if success, -1 if an error occurs
+ */
 int getCursorPosition(int *rows, int *cols) {
     char buf[32];
     unsigned int i = 0;
@@ -209,6 +223,9 @@ int getCursorPosition(int *rows, int *cols) {
  *  Args:
  *      (int *) rows: pointer to int to store the number of rows in terminal
  *      (int *) cols: pointer to int to store the number of columns in terminal
+ * 
+ *  Return:
+ *      (int): 0 if success, -1 if an error occurs
  */
 int getWindowSize(int *rows, int *cols) {
     struct winsize ws;
@@ -239,6 +256,11 @@ struct abuf {
 /**
  *  abAppend:
  *  Appends a string the existing buffer.
+ * 
+ *  Args:
+ *      (struct abuf *) ab: Pointer to the current buffer
+ *      (const char *) s: The string to add to the buffer
+ *      (int) len: The length of s
  */
 void abAppend(struct abuf *ab, const char *s, int len) {
     // Allocate enough memory to hold the new string
@@ -254,6 +276,9 @@ void abAppend(struct abuf *ab, const char *s, int len) {
 /**
  *  abFree:
  *  Frees the memory used for buffer.
+ * 
+ *  Args:
+ *      (struct abuf *) ab: Pointer to the current buffer
  */
 void abFree(struct abuf *ab) {
     free(ab->b);
@@ -263,6 +288,10 @@ void abFree(struct abuf *ab) {
 
 /**
  * editorDrawRows:
+ * Draw the rows of the editor into the buffer.
+ * 
+ *  Args:
+ *      (struct abuf *) ab: Pointer to the current buffer
  */
 void editorDrawRows(struct abuf *ab) {
     int y;
@@ -298,7 +327,7 @@ void editorDrawRows(struct abuf *ab) {
 
 /**
  * editorRefreshScreen:
- * Clears the terminal screen.
+ * Clears the terminal.
  */
 void editorRefreshScreen() {
     struct abuf ab = ABUF_INIT;
@@ -325,6 +354,9 @@ void editorRefreshScreen() {
 /**
  * editorMoveCursor:
  * Moves the cursor given an input key.
+ * 
+ * Args:
+ *      (int) key: The code for the key that was pressed
  */
 void editorMoveCursor(int key) {
     switch (key) {
@@ -409,6 +441,10 @@ void initEditor() {
     }
 }
 
+/**
+ * main:
+ * Main function to the program.
+ */
 int main() {
     enableRawMode();
     initEditor();
