@@ -32,7 +32,7 @@ enum editorKey {
     PAGE_DOWN
 };
 
-/*** data ***/
+/*** data  ***/
 
 /* Editor row */
 typedef struct erow {
